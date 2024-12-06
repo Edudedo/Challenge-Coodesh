@@ -12,6 +12,8 @@ return new class extends Migration
             $table->id();
             $table->string('word')->unique();
             $table->json('details')->nullable();
+            $table->text('definition');
+            $table->json('synonyms')->nullable();
             $table->timestamps();
         });
     }

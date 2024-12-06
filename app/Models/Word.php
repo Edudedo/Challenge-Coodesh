@@ -11,14 +11,19 @@ class Word extends Model
 
     protected $fillable = [
         'word',      
-        'details',   
+        'details',
+        'synonyms'   
     ];
 
     protected $casts = [
         'details' => 'array',
     ];
 
-    public function history()
+    protected $cast = [
+        'synonyms' => 'array'
+    ];
+
+    public function histories()
     {
         return $this->hasMany(History::class);
     }
