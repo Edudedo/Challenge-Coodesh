@@ -10,7 +10,7 @@ use \Illuminate\Support\Facades\Hash;
 class AuthController extends Controller
 {
     //Funcao para registrar
-    public function singUp (Request $request) {
+    public function signup (Request $request) {
         $validated = $request->validate([
             'name' => 'required|string',
             'email' => 'required|email|unique:users',
@@ -33,7 +33,7 @@ class AuthController extends Controller
     }
 
     //Funcao para logar
-    public function signIn(Request $request) {
+    public function signin(Request $request) {
         $credentials = $request->validate([
             'email' => 'required|email',
             'password' => 'required',

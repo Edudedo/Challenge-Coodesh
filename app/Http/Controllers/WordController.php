@@ -56,6 +56,6 @@ class WordController extends Controller
 
         $user->favorites()->where('word_id', $word->id)->delete();
 
-        return response()->json(['message' => 'Word removed from favorites.']);
+        return response()->json(['message' => 'Palavra removida das favoritas.']);
     }
 }

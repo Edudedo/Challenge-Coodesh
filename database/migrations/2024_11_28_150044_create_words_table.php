@@ -11,8 +11,7 @@ return new class extends Migration
         Schema::create('words', function (Blueprint $table) {
             $table->id();
             $table->string('word')->unique();
-            $table->json('details')->nullable();
-            $table->text('definition');
+            $table->text('definition')->nullable();
             $table->json('synonyms')->nullable();
             $table->timestamps();
         });

@@ -16,9 +16,7 @@ Route::middleware([EnsureFrontendRequestsAreStateful::class, 'auth:sanctum', 'th
     });
     Route::get('/user/me/history', [UserController::class, 'history']);
     Route::get('/user/me/favorites', [UserController::class, 'favorites']);
-    //Rotas de registro e login
-    Route::post('/auth/signup', [AuthController::class, 'signup']);
-    Route::post('/auth/signin', [AuthController::class, 'signin']);
+
     //Grupo de rotas para mostrar , favoritar e desfavoritar alguma palavra
     Route::get('/entries/en', [WordController::class, 'list']);
     Route::get('/entries/en/{word}', [WordController::class, 'show']);
@@ -26,8 +24,9 @@ Route::middleware([EnsureFrontendRequestsAreStateful::class, 'auth:sanctum', 'th
     Route::delete('/entries/en/{word}/unfavorite', [WordController::class, 'unfavorite']);
 });
 
-
-
+    //Rotas de registro e login
+    Route::post('/auth/signup', [AuthController::class, 'signup']);
+    Route::post('/auth/signin', [AuthController::class, 'signin']);
 
 
 

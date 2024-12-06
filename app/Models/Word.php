@@ -11,14 +11,8 @@ class Word extends Model
 
     protected $fillable = [
         'word',      
-        'details',
         'synonyms'   
     ];
-
-    protected $casts = [
-        'details' => 'array',
-    ];
-
     protected $cast = [
         'synonyms' => 'array'
     ];
