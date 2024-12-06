@@ -6,6 +6,7 @@ use App\Models\Word;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class WordController extends Controller
 {
@@ -15,7 +16,17 @@ class WordController extends Controller
         $search = $request->query('search', '');
         $limit = $request->query('limit', 10);
 
-        $words = Word::where('word', 'like', "%{$search}%")->paginate($limit);
+        $cacheKey = "words_search_{$search}_limit_{$limit}";
+
+        $start = microtime(true);
+
+        $words = Cache::remember($cacheKey, 3600, function () use ($search, $limit) {
+            return Word::where('word', 'like', "%{$search}%")->paginate($limit);
+        });
+
+        $end = microtime(true);
+
+        $cacheStatus = Cache::has($cacheKey) ? 'HIT' : 'MISS';
 
         return response()->json([
             'results' => $words->items(),
@@ -24,38 +35,55 @@ class WordController extends Controller
             'totalPages' => $words->lastPage(),
             'hasNext' => $words->hasMorePages(),
             'hasPrev' => $words->currentPage() > 1,
-        ]);
+        ])
+        ->header('x-cache', $cacheStatus)
+        ->header('x-respose-time', round(($end - $start) * 1000, 2) . 'ms');
     }
     
     //funcao para registrar no histórico e ver os detalhes da palavra
     public function show($word)
     {
-        $word = Word::where('word', $word)->firstOrFail();
+        
+    $cacheKey = "word_details_{$word}";
 
-        $user = auth('sanctum')->user();
-        $user->histories()->create(['word_id' => $word->id]);
+    $start = microtime(true);
 
-        return response()->json($word);
+    $wordDetails = Cache::remember($cacheKey, 3600, function () use ($word) {
+    
+        return Word::where('word', $word)->firstOrFail();
+    });
+
+    $end = microtime(true);
+
+    $cacheStatus = Cache::has($cacheKey) ? 'HIT' : 'MISS';
+
+    return response()->json($wordDetails)
+        ->header('x-cache', $cacheStatus)
+        ->header('x-response-time', round(($end - $start) * 1000, 2) . 'ms');
     }
     
     public function favorite($word)
     {
-        $word = Word::where('word', $word)->firstOrFail();
-        
+        $wordModel = Word::where('word', $word)->firstOrFail();
+
         $user = auth('sanctum')->user();
-
-        $user->favorites()->create(['word_id' => $word->id]);
-
-        return response()->json(['message' => 'Palavra adicionada aos favoritos']);
+        $user->favorites()->create(['word_id' => $wordModel->id]);
+    
+        Cache::forget("user_{$user->id}_favorites");
+    
+        return response()->json(['message' => 'Palavra adicionada aos favoritos'], 201);
     }
     
     public function unfavorite($word)
     {
-        $word = Word::where('word', $word)->firstOrFail();
+        $wordModel = Word::where('word', $word)->firstOrFail();
+
         $user = auth('sanctum')->user();
-
-        $user->favorites()->where('word_id', $word->id)->delete();
-
-        return response()->json(['message' => 'Palavra removida das favoritas.']);
+    
+        $user->favorites()->where('word_id', $wordModel->id)->delete();
+    
+        Cache::forget("user_{$user->id}_favorites");
+    
+        return response()->json(['message' => 'Palavra removida dos favoritos']);
     }
 }
